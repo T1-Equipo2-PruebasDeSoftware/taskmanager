@@ -1,5 +1,5 @@
 {
-  "AUTOINCREMENT": 6,
+  "AUTOINCREMENT": 9,
   "tasks": [
     {
       "title": "Limpiar la casa",
@@ -24,6 +24,22 @@
       "tag": "ocio",
       "status": "pendiente",
       "id": 4
+    },
+    {
+      "title": "Tarea de Pruebas de Software",
+      "description": "Tarea 1 - MyTask",
+      "due_date": "2024-09-09",
+      "tag": "progreso",
+      "status": "en progreso",
+      "id": 6
+    },
+    {
+      "title": "Almorzar",
+      "description": "Comer almuerzo",
+      "due_date": "2024-09-09",
+      "tag": "comida",
+      "status": "pendiente",
+      "id": 8
     }
   ]
 }
