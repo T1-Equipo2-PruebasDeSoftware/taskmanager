@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import bcrypt
 
 logging.basicConfig(
     filename='app.log',
@@ -48,7 +49,7 @@ def authenticate(username, password):
     users = load_users()
     for user in users:
         if user['username'] == username:
-            if user['password'] == password:
+            if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
                 logging.info(f"Autenticación exitosa para el usuario: {username}")
                 return True, ""
             else:
