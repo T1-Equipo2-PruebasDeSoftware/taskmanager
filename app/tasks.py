@@ -39,6 +39,11 @@ def mark_overdue_tasks():
 
 def create_task(task):
     try:
+        try:
+            datetime.strptime(task['due_date'], '%Y-%m-%d')
+        except ValueError:
+            return TaskResult(False, "Error: Formato de fecha incorrecto. Use YYYY-MM-DD.")
+        
         with open(DATA_FILE, 'r') as file:
             tasks_data = json.load(file)
             tasks_list = tasks_data.get('tasks', [])
@@ -53,8 +58,15 @@ def create_task(task):
     except FileNotFoundError:
         logging.error("Error: No se encontró el archivo tasks.json.")
         return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
+    except Exception as e:
+        logging.error(f"Error al crear la tarea: {e}")
+        return TaskResult(False, f"Error: {str(e)}")
 
 def update_task(task):
+    valid_statuses = ['pendiente', 'en progreso', 'completada', 'atrasada']
+    if 'status' in task and task['status'] not in valid_statuses:
+        return TaskResult(False, f"Error: Estado '{task['status']}' no válido. Use uno de {valid_statuses}.")
+    
     try:
         with open(DATA_FILE, 'r') as file:
             tasks_data = json.load(file)
@@ -70,6 +82,9 @@ def update_task(task):
     except FileNotFoundError:
         logging.error("Error: No se encontró el archivo tasks.json.")
         return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
+    except Exception as e:
+        logging.error(f"Error al actualizar la tarea: {e}")
+        return TaskResult(False, f"Error: {str(e)}")
 
 def delete_task(task_id):
     try:
