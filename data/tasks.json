@@ -1,45 +1,5 @@
 {
-  "AUTOINCREMENT": 10,
+  "AUTOINCREMENT": 1,
   "tasks": [
-    {
-      "title": "Estudiar CC",
-      "description": "Repasar contenidos de PPT y hacer ejercicios",
-      "due_date": "2024-09-27",
-      "tag": "estudio",
-      "status": "completada",
-      "id": 3
-    },
-    {
-      "title": "Actualizar PC",
-      "description": "Descargar programa para actualizar controladores y usarlo",
-      "due_date": "2024-08-09",
-      "tag": "ocio",
-      "status": "atrasada",
-      "id": 4
-    },
-    {
-      "title": "Tarea de Pruebas de Software",
-      "description": "Tarea 1 - MyTask",
-      "due_date": "2024-09-09",
-      "tag": "progreso",
-      "status": "en progreso",
-      "id": 6
-    },
-    {
-      "title": "Almorzar",
-      "description": "Comer almuerzo",
-      "due_date": "2024-09-09",
-      "tag": "comida",
-      "status": "pendiente",
-      "id": 8
-    },
-    {
-      "title": "Estudiar estaca",
-      "description": "Repasar PPT",
-      "due_date": "2024-06-07",
-      "tag": "estudio",
-      "status": "atrasada",
-      "id": 9
-    }
   ]
 }
