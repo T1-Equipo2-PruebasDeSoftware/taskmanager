@@ -1,6 +1,15 @@
+import logging
 from datetime import datetime
 from app.tasks import find_all_tasks
 from utils.tasks_utils import print_task_list
+import logging
+
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
 
 class FilterResult:
     def __init__(self, success, message, data=None):
@@ -8,31 +17,20 @@ class FilterResult:
         self.message = message
         self.data = data
 
-from datetime import datetime
-
 def filter_tasks_by_due_date(start_date=None, end_date=None):
-    """
-    Filtra tareas por fecha de vencimiento.
-
-    Args:
-        start_date (str): Fecha de inicio en formato YYYY-MM-DD.
-        end_date (str): Fecha de fin en formato YYYY-MM-DD.
-
-    Returns:
-        FilterResult: Resultado del filtrado, con éxito o mensaje de error.
-    """
     try:
         tasks = find_all_tasks()
         if not tasks.success:
+            logging.error(tasks.message)
             return FilterResult(False, tasks.message)
         
         filtered_tasks = tasks.data
         
-        # Convierte las fechas de inicio y fin si están presentes
         if start_date:
             try:
                 start_date = datetime.strptime(start_date, "%Y-%m-%d")
             except ValueError:
+                logging.error("Error: Formato de fecha de inicio incorrecto.")
                 return FilterResult(False, "Error: Formato de fecha de inicio incorrecto.")
                 
             filtered_tasks = [t for t in filtered_tasks if 'due_date' in t and datetime.strptime(t['due_date'], "%Y-%m-%d") >= start_date]
@@ -41,95 +39,75 @@ def filter_tasks_by_due_date(start_date=None, end_date=None):
             try:
                 end_date = datetime.strptime(end_date, "%Y-%m-%d")
             except ValueError:
+                logging.error("Error: Formato de fecha de fin incorrecto.")
                 return FilterResult(False, "Error: Formato de fecha de fin incorrecto.")
                 
             filtered_tasks = [t for t in filtered_tasks if 'due_date' in t and datetime.strptime(t['due_date'], "%Y-%m-%d") <= end_date]
         
         if start_date and end_date and start_date > end_date:
+            logging.error("Error: La fecha de inicio no puede ser posterior a la fecha de fin.")
             return FilterResult(False, "Error: La fecha de inicio no puede ser posterior a la fecha de fin.")
         
         return FilterResult(True, "Tareas filtradas por fecha de vencimiento.", filtered_tasks)
     except Exception as e:
+        logging.error(f"Error: {str(e)}")
         return FilterResult(False, f"Error: {str(e)}")
 
 
 def filter_tasks_by_tag(tag):
-    """
-    Filtra tareas por etiqueta.
-
-    Args:
-        tag (str): Etiqueta para filtrar.
-
-    Returns:
-        FilterResult: Resultado del filtrado, con éxito o mensaje de error.
-    """
     tasks = find_all_tasks()
     if not tasks.success:
+        logging.error(tasks.message)
         return FilterResult(False, tasks.message)
     
     filtered_tasks = [t for t in tasks.data if t['tag'].lower() == tag.lower()]
     
     if not filtered_tasks:
+        logging.warning(f"No existen tareas con la etiqueta: {tag}.")
         return FilterResult(False, f"No existen tareas con la etiqueta: {tag}.")
     
     return FilterResult(True, f"Tareas filtradas por etiqueta: {tag}.", filtered_tasks)
 
 def filter_tasks_by_status(status):
-    """
-    Filtra tareas por estado.
-
-    Args:
-        status (str): Estado para filtrar.
-
-    Returns:
-        FilterResult: Resultado del filtrado, con éxito o mensaje de error.
-    """
     tasks = find_all_tasks()
     if not tasks.success:
+        logging.error(tasks.message)
         return FilterResult(False, tasks.message)
     
-    status = status.lower()  # Convertir estado ingresado a minúsculas
+    status = status.lower()
     
     filtered_tasks = [t for t in tasks.data if t['status'].lower() == status]
     
     if not filtered_tasks:
+        logging.warning(f"No se encontraron tareas con el estado: {status}.")
         return FilterResult(False, f"No se encontraron tareas con el estado: {status}.")
     
     return FilterResult(True, f"Tareas filtradas por estado: {status}.", filtered_tasks)
 
 def search_tasks_by_title(title):
-    """
-    Busca tareas por título.
-
-    Args:
-        title (str): Título o parte del título para buscar.
-
-    Returns:
-        FilterResult: Resultado de la búsqueda, con éxito o mensaje de error.
-    """
-    if not title:  # Verifica si el título está vacío
+    if not title:
+        logging.error("No se proporcionó un título para buscar.")
         return FilterResult(False, "No se proporcionó un título para buscar.")
     
     tasks = find_all_tasks()
     if not tasks.success:
+        logging.error(tasks.message)
         return FilterResult(False, tasks.message)
     
     filtered_tasks = [t for t in tasks.data if title.lower() in t['title'].lower()]
     
     if not filtered_tasks:
+        logging.warning(f"No se encontraron tareas con el título: {title}.")
         return FilterResult(False, f"No se encontraron tareas con el título: {title}.")
     
     return FilterResult(True, f"Tareas encontradas con el título: {title}.", filtered_tasks)
 
 def filter_and_search_tasks():
-    """
-    Muestra el menú para filtrar o buscar tareas y procesa la opción seleccionada por el usuario.
-    """
-    print("Filtrar o buscar tareas:")
-    print("1. Filtrar por fecha de vencimiento")
-    print("2. Filtrar por etiqueta")
-    print("3. Filtrar por estado")
-    print("4. Buscar por título")
+    logging.info("Filtrar o buscar tareas:")
+    logging.info("1. Filtrar por fecha de vencimiento")
+    logging.info("2. Filtrar por etiqueta")
+    logging.info("3. Filtrar por estado")
+    logging.info("4. Buscar por título")
     
     choice = input("Seleccione una opción (1-4): ")
     
@@ -147,11 +125,13 @@ def filter_and_search_tasks():
         title = input("Título o parte del título: ")
         result = search_tasks_by_title(title)
     else:
+        logging.error("Opción inválida.")
         print("Opción inválida.")
         return
     
     if result.success:
-        print("Mostrando tareas:")
+        logging.info("Mostrando tareas:")
         print_task_list(result.data)
     else:
+        logging.warning(result.message)
         print(result.message)

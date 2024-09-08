@@ -1,20 +1,12 @@
 {
-  "AUTOINCREMENT": 9,
+  "AUTOINCREMENT": 10,
   "tasks": [
-    {
-      "title": "Limpiar la casa",
-      "description": "Debo barrer y desengrasar la cocina",
-      "due_date": "2024-09-10",
-      "tag": "hogar",
-      "id": 2,
-      "status": "completada"
-    },
     {
       "title": "Estudiar CC",
       "description": "Repasar contenidos de PPT y hacer ejercicios",
       "due_date": "2024-09-27",
       "tag": "estudio",
-      "status": "pendiente",
+      "status": "completada",
       "id": 3
     },
     {
@@ -22,7 +14,7 @@
       "description": "Descargar programa para actualizar controladores y usarlo",
       "due_date": "2024-08-09",
       "tag": "ocio",
-      "status": "pendiente",
+      "status": "atrasada",
       "id": 4
     },
     {
@@ -40,6 +32,14 @@
       "tag": "comida",
       "status": "pendiente",
       "id": 8
+    },
+    {
+      "title": "Estudiar estaca",
+      "description": "Repasar PPT",
+      "due_date": "2024-06-07",
+      "tag": "estudio",
+      "status": "atrasada",
+      "id": 9
     }
   ]
 }

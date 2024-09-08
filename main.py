@@ -1,4 +1,4 @@
-from app.tasks import create_task, update_task, delete_task, find_all_tasks
+from app.tasks import create_task, update_task, delete_task, find_all_tasks, mark_overdue_tasks
 from utils.tasks_utils import print_task_list, print_task_details, print_all_tasks
 from app.filters import filter_tasks_by_due_date, filter_tasks_by_tag, filter_tasks_by_status, search_tasks_by_title
 from app.auth import authenticate
@@ -7,6 +7,13 @@ def main_menu():
     """
     Muestra el menú principal y permite al usuario seleccionar opciones para gestionar tareas.
     """
+    
+    result = mark_overdue_tasks()
+    if result.success:
+        print(result.message)
+    else:
+        print(result.message)
+
     while True:
         print("="*30)
         print("       Autenticación")
@@ -17,8 +24,7 @@ def main_menu():
         is_authenticated, message = authenticate(username, password)
         if not is_authenticated:
             print(message)
-            continue  # Solicitar credenciales nuevamente si la autenticación falla
-        
+            continue
         while True:
             print("="*30)
             print("       Menú de Tareas")
@@ -28,7 +34,7 @@ def main_menu():
             print("3. Eliminar tarea")
             print("4. Listar todas las tareas")
             print("5. Buscar tarea por ID")
-            print("6. Filtrar/Buscar tareas")  # Nueva opción
+            print("6. Filtrar/Buscar tareas")
             print("7. Salir")
             print("="*30)
             
@@ -137,10 +143,10 @@ def filter_and_search_tasks():
             title = input("Título o parte del título: ")
             result = search_tasks_by_title(title)
         elif choice == '5':
-            break  # Salir del bucle y volver al menú principal
+            break
         else:
             print("Opción inválida.")
-            continue  # Volver a mostrar el menú de filtrado/búsqueda
+            continue
 
         if result.success:
             print("="*30)
