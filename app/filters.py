@@ -69,20 +69,23 @@ def filter_tasks_by_tag(tag):
     return FilterResult(True, f"Tareas filtradas por etiqueta: {tag}.", filtered_tasks)
 
 def filter_tasks_by_status(status):
+    valid_statuses = ['pendiente', 'en progreso', 'completada', 'atrasada']
+    if status not in valid_statuses:
+        logging.error(f"Estado '{status}' no válido. Use 'pendiente', 'en progreso', 'completada' o 'atrasada.'")
+        return FilterResult(False, f"Error: Estado '{status}' no válido. Use 'pendiente', 'en progreso', 'completada' o 'atrasada.'")
+    
     tasks = find_all_tasks()
     if not tasks.success:
         logging.error(tasks.message)
         return FilterResult(False, tasks.message)
     
-    status = status.lower()
-    
-    filtered_tasks = [t for t in tasks.data if t['status'].lower() == status]
+    filtered_tasks = [t for t in tasks.data if t['status'] == status]
     
     if not filtered_tasks:
         logging.warning(f"No se encontraron tareas con el estado: {status}.")
         return FilterResult(False, f"No se encontraron tareas con el estado: {status}.")
     
-    return FilterResult(True, f"Tareas filtradas por estado: {status}.", filtered_tasks)
+    return FilterResult(True, f"Tareas encontradas con el estado: {status}.", filtered_tasks)
 
 def search_tasks_by_title(title):
     if not title:
@@ -119,19 +122,18 @@ def filter_and_search_tasks():
         tag = input("Etiqueta a filtrar: ")
         result = filter_tasks_by_tag(tag)
     elif choice == '3':
-        status = input("Estado (pendiente, en progreso, completada): ")
+        status = input("Estado (pendiente, en progreso, completada, atrasada): ")
         result = filter_tasks_by_status(status)
     elif choice == '4':
         title = input("Título o parte del título: ")
         result = search_tasks_by_title(title)
     else:
-        logging.error("Opción inválida.")
-        print("Opción inválida.")
-        return
+        logging.error("Opción no válida.")
+        result = FilterResult(False, "Opción no válida.")
     
     if result.success:
-        logging.info("Mostrando tareas:")
-        print_task_list(result.data)
+        logging.info(result.message)
+        for task in result.data:
+            logging.info(task)
     else:
         logging.warning(result.message)
-        print(result.message)

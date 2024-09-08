@@ -25,6 +25,8 @@ def main_menu():
         if not is_authenticated:
             print(message)
             continue
+        else:
+            print("Autenticación exitosa.")
         while True:
             print("="*30)
             print("       Menú de Tareas")
@@ -137,7 +139,7 @@ def filter_and_search_tasks():
             tag = input("Etiqueta a filtrar: ")
             result = filter_tasks_by_tag(tag)
         elif choice == '3':
-            status = input("Estado (pendiente, en progreso, completada): ")
+            status = input("Estado (pendiente, en progreso, completada, atrasada): ")
             result = filter_tasks_by_status(status)
         elif choice == '4':
             title = input("Título o parte del título: ")
