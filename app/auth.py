@@ -1,5 +1,13 @@
 import os
 import json
+import logging
+
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
 
 def load_users(file_path='data/auth.json'):
     """
@@ -12,17 +20,17 @@ def load_users(file_path='data/auth.json'):
         list: Lista de usuarios cargados desde el archivo. Si ocurre un error, se devuelve una lista vacía.
     """
     if not os.path.isfile(file_path):
-        print("Error: El archivo de autenticación no se encuentra.")
+        logging.error("Error: El archivo de autenticación no se encuentra.")
         return []
 
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
     except json.JSONDecodeError:
-        print("Error: El archivo de autenticación está corrupto.")
+        logging.error("Error: El archivo de autenticación está corrupto.")
         return []
     except Exception as e:
-        print(f"Error al cargar el archivo de autenticación: {e}")
+        logging.error(f"Error al cargar el archivo de autenticación: {e}")
         return []
 
 def authenticate(username, password):
@@ -41,7 +49,10 @@ def authenticate(username, password):
     for user in users:
         if user['username'] == username:
             if user['password'] == password:
+                logging.info(f"Autenticación exitosa para el usuario: {username}")
                 return True, ""
             else:
+                logging.warning(f"Contraseña incorrecta para el usuario: {username}")
                 return False, "Contraseña incorrecta."
+    logging.warning(f"Usuario incorrecto: {username}")
     return False, "Usuario incorrecto."

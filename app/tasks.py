@@ -1,5 +1,14 @@
 import json
 import os
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, '../data/tasks.json')
@@ -9,6 +18,24 @@ class TaskResult:
         self.success = success
         self.message = message
         self.data = data
+
+def mark_overdue_tasks():
+    try:
+        with open(DATA_FILE, 'r') as file:
+            tasks_data = json.load(file)
+            tasks_list = tasks_data.get('tasks', [])
+            current_date = datetime.now().date()
+            for task in tasks_list:
+                due_date = datetime.strptime(task['due_date'], '%Y-%m-%d').date()
+                if due_date < current_date and task['status'] != 'completada':
+                    task['status'] = 'atrasada'
+        with open(DATA_FILE, 'w') as file:
+            json.dump(tasks_data, file, indent=2)
+        return TaskResult(True, "Tareas vencidas marcadas como atrasadas.")
+    except FileNotFoundError:
+        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+    except Exception as e:
+        return TaskResult(False, f"Error: {str(e)}")
 
 def create_task(task):
     try:
@@ -21,9 +48,11 @@ def create_task(task):
             tasks_data['AUTOINCREMENT'] += 1
         with open(DATA_FILE, 'w') as file:
             json.dump(tasks_data, file, indent=2)
+        logging.info("Tarea creada exitosamente.")
         return TaskResult(True, "Tarea creada exitosamente.")
     except FileNotFoundError:
-        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+        logging.error("Error: No se encontró el archivo tasks.json.")
+        return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
 
 def update_task(task):
     try:
@@ -36,9 +65,11 @@ def update_task(task):
                     break
         with open(DATA_FILE, 'w') as file:
             json.dump(tasks_data, file, indent=2)
+        logging.info("Tarea actualizada exitosamente.")
         return TaskResult(True, "Tarea actualizada exitosamente.")
     except FileNotFoundError:
-        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+        logging.error("Error: No se encontró el archivo tasks.json.")
+        return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
 
 def delete_task(task_id):
     try:
@@ -47,22 +78,27 @@ def delete_task(task_id):
             tasks_list = tasks_data.get('tasks', [])
             task_exists = any(t['id'] == task_id for t in tasks_list)
             if not task_exists:
+                logging.error("Error: La tarea con el ID especificado no existe.")
                 return TaskResult(False, "Error: La tarea con el ID especificado no existe.")
             tasks_list = [t for t in tasks_list if t['id'] != task_id]
             tasks_data['tasks'] = tasks_list
         with open(DATA_FILE, 'w') as file:
             json.dump(tasks_data, file, indent=2)
+        logging.info("Tarea eliminada exitosamente.")
         return TaskResult(True, "Tarea eliminada exitosamente.")
     except FileNotFoundError:
-        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+        logging.error("Error: No se encontró el archivo tasks.json.")
+        return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
 
 def find_all_tasks():
     try:
         with open(DATA_FILE, 'r') as file:
             tasks_data = json.load(file)
-            return TaskResult(True, "Tareas encontradas.", tasks_data.get('tasks', []))
+            logging.info("Todas las tareas encontradas.")
+            return TaskResult(True, "Todas las tareas encontradas.", tasks_data.get('tasks', []))
     except FileNotFoundError:
-        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+        logging.error("Error: No se encontró el archivo tasks.json.")
+        return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
 
 def find_task_by_id(task_id):
     try:
@@ -70,8 +106,11 @@ def find_task_by_id(task_id):
             tasks_data = json.load(file)
             task = next((t for t in tasks_data.get('tasks', []) if t['id'] == task_id), None)
             if task:
+                logging.info("Tarea encontrada.")
                 return TaskResult(True, "Tarea encontrada.", task)
             else:
+                logging.error("Tarea no encontrada.")
                 return TaskResult(False, "Tarea no encontrada.")
     except FileNotFoundError:
-        return TaskResult(False, "Error: El archivo tasks.json no fue encontrado.")
+        logging.error("Error: No se encontró el archivo tasks.json.")
+        return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
