@@ -32,7 +32,7 @@ Una vez que hayas completado estos pasos, estarás listo para utilizar Task Mana
 ## Como usar
 Para correr el programa, usando la consola, debes colocarte en el directorio raíz del proyecto, y usar 
 ```
-python ./main.py.
+python .\main.py.
 ```
 Las credenciales de inicio se sesión son: 
 ```
