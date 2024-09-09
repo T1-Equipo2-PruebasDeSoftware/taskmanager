@@ -19,6 +19,17 @@ class TaskResult:
         self.message = message
         self.data = data
 
+def validate_task(task):
+    if len(task['title']) > 50:
+        return TaskResult(False, "Los títulos tienen un máximo de 50 caracteres.")
+    if len(task['description']) > 250:
+        return TaskResult(False, "Las descripciones tienen un máximo de 250 caracteres.")
+    if len(task['tag']) > 20:
+        return TaskResult(False, "Las etiquetas tienen un máximo de 20 caracteres.")
+    if not task['title']:
+        return TaskResult(False, "Los títulos de las tareas no pueden estar en blanco.")
+    return TaskResult(True, "Tarea válida.")
+
 def mark_overdue_tasks():
     try:
         with open(DATA_FILE, 'r') as file:
@@ -39,11 +50,14 @@ def mark_overdue_tasks():
 
 def create_task(task):
     try:
-        try:
-            datetime.strptime(task['due_date'], '%Y-%m-%d')
-        except ValueError:
-            return TaskResult(False, "Error: Formato de fecha incorrecto. Use YYYY-MM-DD.")
-        
+        datetime.strptime(task['due_date'], '%Y-%m-%d')
+    except ValueError:
+        return TaskResult(False, "Error: Formato de fecha incorrecto. Use YYYY-MM-DD.")
+    validation_result = validate_task(task)
+    if not validation_result.success:
+        return validation_result
+    
+    try:
         with open(DATA_FILE, 'r') as file:
             tasks_data = json.load(file)
             tasks_list = tasks_data.get('tasks', [])
@@ -58,15 +72,11 @@ def create_task(task):
     except FileNotFoundError:
         logging.error("Error: No se encontró el archivo tasks.json.")
         return TaskResult(False, "Error: No se encontró el archivo tasks.json.")
-    except Exception as e:
-        logging.error(f"Error al crear la tarea: {e}")
-        return TaskResult(False, f"Error: {str(e)}")
 
 def update_task(task):
     valid_statuses = ['pendiente', 'en progreso', 'completada', 'atrasada']
     if 'status' in task and task['status'] not in valid_statuses:
         return TaskResult(False, f"Error: Estado '{task['status']}' no válido. Use uno de {valid_statuses}.")
-    
     try:
         with open(DATA_FILE, 'r') as file:
             tasks_data = json.load(file)
@@ -85,7 +95,6 @@ def update_task(task):
     except Exception as e:
         logging.error(f"Error al actualizar la tarea: {e}")
         return TaskResult(False, f"Error: {str(e)}")
-
 def delete_task(task_id):
     try:
         with open(DATA_FILE, 'r') as file:
