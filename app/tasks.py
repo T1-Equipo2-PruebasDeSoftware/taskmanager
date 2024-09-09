@@ -49,6 +49,10 @@ def mark_overdue_tasks():
         return TaskResult(False, f"Error: {str(e)}")
 
 def create_task(task):
+    try:
+        datetime.strptime(task['due_date'], '%Y-%m-%d')
+    except ValueError:
+        return TaskResult(False, "Error: Formato de fecha incorrecto. Use YYYY-MM-DD.")
     validation_result = validate_task(task)
     if not validation_result.success:
         return validation_result
