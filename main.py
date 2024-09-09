@@ -2,12 +2,10 @@ from app.tasks import create_task, update_task, delete_task, find_all_tasks, mar
 from utils.tasks_utils import print_task_list, print_task_details, print_all_tasks
 from app.filters import filter_tasks_by_due_date, filter_tasks_by_tag, filter_tasks_by_status, search_tasks_by_title
 from app.auth import authenticate
-
 def main_menu():
     """
     Muestra el menú principal y permite al usuario seleccionar opciones para gestionar tareas.
     """
-    
     result = mark_overdue_tasks()
     if result.success:
         print(result.message)
@@ -27,6 +25,7 @@ def main_menu():
             continue
         else:
             print("Autenticación exitosa.")
+        
         while True:
             print("="*30)
             print("       Menú de Tareas")
@@ -64,17 +63,25 @@ def main_menu():
                     selected_id = int(input("Seleccione el ID de la tarea para actualizar: "))
                     task = next((t for t in tasks.data if t['id'] == selected_id), None)
                     if task:
-                        status = input("Nuevo estado (pendiente, en progreso, completada): ")
-                        task_update = {
-                            "id": selected_id,
-                            "status": status
-                        }
-                        result = update_task(task_update)
-                        print(result.message)
+                        while True:
+                            status = input("Nuevo estado (pendiente, en progreso, completada, atrasada): ")
+                            valid_statuses = ['pendiente', 'en progreso', 'completada', 'atrasada']
+                            if status not in valid_statuses:
+                                print(f"Error: Estado '{status}' no válido. Use 'pendiente', 'en progreso', 'completada' o 'atrasada'.")
+                                continue
+                            else:
+                                task_update = {
+                                    "id": selected_id,
+                                    "status": status
+                                }
+                                result = update_task(task_update)
+                                print(result.message)
+                                break
                     else:
                         print("ID de tarea inválido.")
                 else:
                     print(tasks.message)
+
             
             elif choice == '3':
                 tasks = find_all_tasks()
@@ -97,12 +104,15 @@ def main_menu():
                 tasks = find_all_tasks()
                 if tasks.success:
                     print_task_list(tasks.data)
-                    selected_id = int(input("Seleccione el ID de la tarea para ver detalles: "))
-                    task = next((t for t in tasks.data if t['id'] == selected_id), None)
-                    if task:
-                        print_task_details(task)
-                    else:
-                        print("ID de tarea inválido.")
+                    try:
+                        selected_id = int(input("Seleccione el ID de la tarea para ver detalles: "))
+                        task = next((t for t in tasks.data if t['id'] == selected_id), None)
+                        if task:
+                            print_task_details(task)
+                        else:
+                            print("ID de tarea inválido.")
+                    except ValueError:
+                        print("ID de tarea inválido. Por favor, ingrese un número entero.")
                 else:
                     print(tasks.message)
 
